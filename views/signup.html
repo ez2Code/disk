@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign up</title>
+	<link rel="stylesheet" href="/stylesheet/bootstrap.min.css">
+	<script type="text/javascript" src="/script/jquery.min.js"></script>
+</head>
+<body>
+	<div style="width:800px;margin:auto;text-align: center;background-color: #ECFFFF;padding:45px 30px;">
+		<div style="width:250px;height:320px;background-color: #DFFFDF;margin:auto;text-align: center;padding: 50px 45px;border-style:solid;border-width:5px;
+border-color:white;border-radius:20px;">
+			<div style='position: relative;top: -20px;height: 28px;'>
+				<p style="font-style: italic;font-weight:bold;font-size: 20px">Levy's disk</p>
+			</div>
+			<form action="/coount/signup" method="post" enctype="application/json" onsubmit="return checkUser()">
+				<label for="user">用户名</label>
+				<input type="text" id="user" name="user">
+				<label for="passwd">密码</label>
+				<input type='password' id="passwd" name='passwd'>
+				<label for="passwd">重复密码</label>
+				<input type='password' id="repasswd" name='repasswd'><br/><br/>
+				<button class="btn btn-success btn-xs" type="submit">注册</button>
+			</form>
+		</div>
+	</div>
+</body>
+<script type="text/javascript">
+	function checkUser() {
+		var passwd = $('#passwd').attr('value');
+		var repasswd = $('#repasswd').attr('value');
+		if(passwd==repasswd){
+			return true;
+		}else{
+			alert('两次输入的密码不同！');
+			return false;
+		}
+	}
+</script>
+</html>

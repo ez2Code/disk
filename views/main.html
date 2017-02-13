@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Disk</title>
+	<link rel="stylesheet" href="/stylesheet/bootstrap.min.css">
+	<link rel="stylesheet" href="/stylesheet/uploadfile.css">
+	<script src="/script/jquery.min.js"></script>
+	<script src="/script/bootstrap.min.js"></script>
+	<script src="/script/jquery.uploadfile.min.js"></script>
+	<script src="/script/jquery.form.js"></script>
+</head>
+<body>
+	<div class="col-md-3"></div>
+	<div class="col-md-6" style="background-color: #ECFFFF;padding:80px 100px;height: 100%;">
+		<div style="border: 5px solid white;border-radius:20px;padding:10px 30px;">
+			<p style="font-weight:bold;font-size: 25px">Levys's disk</p>
+		</div><br/>
+		<button class="btn btn-success btn-xs" data-toggle="modal" data-target="#uploadModal">文件上传</button>&nbsp&nbsp
+		<button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#dirModal">新建文件夹</button>
+		<button class="btn btn-warning btn-xs pull-right" onclick="window.location.href='/account/logout'">logout</button><br/><hr/>
+		<div id='fileList'></div>
+
+	</div>
+	<div class='col-md-3'></div>
+	<div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+						&times;
+					</button>
+					<h4 class="modal-title" id="uploadModalLabel">
+						文件上传
+					</h4>
+				</div>
+				<div class="modal-body">
+					<p style="font-weight:bold;font-size: 24px">请选择或拖拽上传文件</p>
+					<div id="fileuploader">Upload</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="return loadFiles('.')">完成上传</button>
+				</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal -->
+	</div>
+
+	<div class="modal fade" id="dirModal" tabindex="-1" role="dialog" aria-labelledby="createDirModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+						&times;
+					</button>
+					<h4 class="modal-title" id="createDirModalLabel">
+						新建文件夹
+					</h4>
+				</div>
+				<div class="modal-body">
+					<label for="dirName">文件夹名</label><br/>
+					<input type='text' id='dirName'>
+					<br/><br/>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-success btn-sm" data-dismiss="modal" onclick="return createDir()">
+						确认创建
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="shareModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+						&times;
+					</button>
+					<h4 class="modal-title" id="myModalLabel">
+						分享
+					</h4>
+				</div>
+				<div class="modal-body">
+					<p id="shareLink"></p>
+					<br/><br/>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript">
+	function loadFiles(path){
+		$.post('/disk',{'path':path},function(data){
+			if (data.success) {
+				$("#fileList").empty();
+				if(!data.isRoot){
+					$('#fileList').append('<button class="btn btn-warning btn-xs" onclick="return loadFiles(\'\')">back</button><br/><br/>');
+				}
+				data.files.forEach(function(key){
+					var content='';
+					if (key.isFile) {
+						content = '<a tabindex="0" class="btn btn-sm btn-link" role="button" data-toggle="popover" value="'+key.path+'" filetype="file">'+key.name+'</a><br/>';
+					}else{
+						content = '<a tabindex="0" class="btn btn-sm btn-link" role="button" data-toggle="popover" value="'+key.path+'" filetype="dir">'+key.name+'</a><br/>';
+					}
+					$('#fileList').append(content);
+				});
+				generatePopover();
+			}else{
+				alert(data.msg);
+			}
+		});
+	}
+
+	loadFiles('/');
+
+	function generatePopover(){
+
+		$('[data-toggle="popover"]').each(function () {
+			var element = $(this);
+			var path = element.attr('value');
+			var name = element.html();
+			var fileType = element.attr('filetype');
+			element.popover({
+				trigger: 'manual',
+				placement: 'right', //top, bottom, left or right
+				title: name,
+				html: 'true',
+				content: generateOperations(path,fileType),
+			}).on("mouseenter", function () {
+				var _this = this;
+				$(this).popover("show");
+				$(this).siblings(".popover").on("mouseleave", function () {
+					$(_this).popover('hide');
+				});
+			}).on("mouseleave", function () {
+				var _this = this;
+				setTimeout(function () {
+					if (!$(".popover:hover").length) {
+						$(_this).popover("hide")
+					}
+				}, 100);
+			});
+		});
+	}
+
+	function generateOperations(path,type){
+		var contentStr = '&nbsp&nbsp<button type="button" class="btn btn-danger btn-xs" onclick="return generateShareLink(\''+path+'\')">share</button>';
+		contentStr += '&nbsp&nbsp<button type="button" class="btn btn-danger btn-xs" onclick="return deleteFileOrDir(\''+path+'\')">delete</button>';
+		if(type=='file'){
+			var tmp = '<button type="button" class="btn btn-success btn-xs" onclick="return downloadFile(\''+path+'\')">download</button>';
+		}else{
+			var tmp = '<button type="button" class="btn btn-success btn-xs" onclick="return loadFiles(\''+path+'\')">open</button>';
+		}
+		return tmp + contentStr;
+	}
+
+	function downloadFile(path){
+		window.location.href='/operate/download'+path;
+	}
+	function createDir(){
+		var dirName = $('#dirName').val();
+		$.get('/operate/createDir',{'targetDir':dirName},function(data){
+			if(data.success){
+				loadFiles('.');
+			}else{
+				alert('fail to create!\n'+data.message);
+			}
+		});
+	}
+	function deleteFileOrDir(path){
+		$.post('/operate/delete',{'path':path},function(data){
+			if(data.success){
+				alert("delete success!");
+				loadFiles('.');
+			}else{
+				alert("delete fail!");
+			}
+		});
+	}
+	function generateShareLink(path){
+		$.post('/operate/generateShare',{'path':path},function(data){
+			if(data.success){
+				$('#shareLink').html(window.location.host+'/share?code='+data.code);
+				$('#shareModal').modal('show')
+			}else{
+				alert('fail to create share link!'+data.message);
+			}
+		});
+	}
+	$(document).ready(function()
+	{
+		$("#fileuploader").uploadFile({
+			url:"/operate/upload",
+			fileName:"resource"
+		});
+	});
+</script>
+</html>

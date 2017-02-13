@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Log in</title>
+	<link rel="stylesheet" href="/stylesheet/bootstrap.min.css">
+	<script type="text/javascript" src="/script/jquery.min.js"></script>
+</head>
+<body>
+	<div style="width:800px;margin:auto;text-align: center;background-color: #ECFFFF;padding:45px 30px;">
+		<div style="width:250px;height:260px;background-color: #DFFFDF;margin:auto;text-align: center;padding: 50px 45px;border-style:solid;border-width:5px;
+border-color:white;border-radius:20px;">
+			<div style='position: relative;top: -20px;height: 28px;'>
+				<p style="font-style: italic;font-weight:bold;font-size: 20px">Levy's disk</p>
+			</div>
+			<form action="/account/login" method="post" enctype="application/json">
+				<label for="user">用户名</label>
+				<input type="text" id="user" name="user">
+				<label for="passwd">密码</label>
+				<input type='password' id="passwd" name='passwd'><br/><br/>
+				<button class="btn btn-success btn-xs" type="submit">登录</button>&nbsp&nbsp
+				<input type="button" class="btn btn-primary btn-xs" onclick="window.location.href='/account/signup'" value="注册">
+			</form>
+		</div>
+	</div>
+</body>
+</html>

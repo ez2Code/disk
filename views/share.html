@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Disk</title>
+	<link rel="stylesheet" href="/stylesheet/bootstrap.min.css">
+	<script src="/script/jquery.min.js"></script>
+	<script src="/script/bootstrap.min.js"></script>
+	<script src="/script/jquery.form.js"></script>
+</head>
+<body>
+	<div class="col-md-3"></div>
+	<div class="col-md-6" style="background-color: #ECFFFF;padding:80px 100px;height: 100%;">
+		<div style="border: 5px solid white;border-radius:20px;padding:10px 30px;">
+			<p style="font-weight:bold;font-size: 25px">Levys's disk</p>
+		</div><hr/>
+		<div>
+			<h4 id='shareTitle' style="text-align: center;margin-top: 45px">获得xxx分享的文件</h4>
+			<div id='fileList'>
+				
+			</div>
+		</div>
+
+	</div>
+</body>
+<script type="text/javascript">
+
+	function loadFiles(path){
+		$.post('/share',{'path':path},function(data){
+			if (data.success) {
+				$("#fileList").empty();
+				if(!data.isRoot){
+					$('#fileList').append('<button class="btn btn-warning btn-xs" onclick="return loadFiles(\'\')">back</button><br/><br/>');
+				}
+				data.files.forEach(function(key){
+					var content='';
+					if (key.isFile) {
+						content = '<a tabindex="0" class="btn btn-sm btn-link" role="button" data-toggle="popover" value="'+key.path+'" filetype="file">'+key.name+'</a><br/>';
+					}else{
+						content = '<a tabindex="0" class="btn btn-sm btn-link" role="button" data-toggle="popover" value="'+key.path+'" filetype="dir">'+key.name+'</a><br/>';
+					}
+					$('#fileList').append(content);
+				});
+				generatePopover();
+			}else{
+				alert(data.msg);
+			}
+		});
+	}
+
+	function generatePopover(){
+
+		$('[data-toggle="popover"]').each(function () {
+			var element = $(this);
+			var path = element.attr('value');
+			var name = element.html();
+			var fileType = element.attr('filetype');
+			element.popover({
+				trigger: 'manual',
+				placement: 'right', //top, bottom, left or right
+				title: name,
+				html: 'true',
+				content: generateOperations(path,fileType),
+			}).on("mouseenter", function () {
+				var _this = this;
+				$(this).popover("show");
+				$(this).siblings(".popover").on("mouseleave", function () {
+					$(_this).popover('hide');
+				});
+			}).on("mouseleave", function () {
+				var _this = this;
+				setTimeout(function () {
+					if (!$(".popover:hover").length) {
+						$(_this).popover("hide")
+					}
+				}, 100);
+			});
+		});
+	}
+
+	function generateOperations(path,type){
+		if(type=='file'){
+			var tmp = '<button type="button" class="btn btn-success btn-xs" onclick="return downloadFile(\''+path+'\')">download</button>';
+		}else{
+			var tmp = '<button type="button" class="btn btn-success btn-xs" onclick="return loadFiles(\''+path+'\')">open</button>';
+		}
+		return tmp;
+	}
+
+	function downloadFile(path){
+		window.location.href='/share/downShare'+path;
+	}
+
+
+	function initShare(){
+		var code = getQueryString("code");
+		$.post('/share/initShare',{'code':code},function(data){
+			if (data.success) {
+				$('#shareTitle').html('获得来自'+data.sharer+'分享的文件');
+				var content='';
+				if (data.isFile) {
+					content = '<a tabindex="0" class="btn btn-sm btn-link" role="button" data-toggle="popover" value="'+data.path+'" filetype="file">'+data.name+'</a><br/>';
+				}else{
+					content = '<a tabindex="0" class="btn btn-sm btn-link" role="button" data-toggle="popover" value="'+data.path+'" filetype="dir">'+data.name+'</a><br/>';
+				}
+				$('#fileList').append(content);
+				generatePopover();
+			}else{
+				$('#shareTitle').html('该文件不存在或已过期!');
+			}
+		});
+	}
+	initShare();
+
+	function getQueryString(name) {
+		var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+		var r = window.location.search.substr(1).match(reg);
+		if (r != null) return unescape(r[2]); return null;
+	}
+</script>
+</html>
