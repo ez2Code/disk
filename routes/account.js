@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var md5 = require('md5');
 var dao = require('../dao/dao');
+var fs = require('fs')
 
 /* login action. */
 router.post('/login', function(req, res, next) {
