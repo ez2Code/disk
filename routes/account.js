@@ -44,7 +44,7 @@ router.post('/signup',function(req,res){
         if(err){
             res.json({'success':false,'msg':'the username has been used!'});
         }else{
-            var targetDir = '/workspace/share/data/'+user_id;
+            var targetDir = '/data/disk/'+user_id;
             req.session.user=user_id;
             fs.mkdir(targetDir,function(err){
                 if(err){

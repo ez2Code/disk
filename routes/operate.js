@@ -8,7 +8,7 @@ var config = require('../config/config');
 router.get('/download/*',function(req,res){
     var req_path = req.path;
     if(req.session.user){
-        var filepath = config.path+'/share/data/'+req.session.user+'/data' + req_path.substr(9);
+        var filepath = config.path+'/disk/'+req.session.user+'/data' + req_path.substr(9);
     }else{
         res.redirect('/account/login');
         return;
@@ -48,7 +48,7 @@ router.post('/upload',function(req,res,next){
             var inputFile = files.resource[0];
             var uploadedPath = inputFile.path;
             //重命名为真实文件名
-            var path = config.path+'/share/data/' + req.session.user+'/data'+req.session.lastReq;
+            var path = config.path+'/disk/' + req.session.user+'/data'+req.session.lastReq;
             fs.rename(uploadedPath, path+'/'+inputFile.originalFilename, function(err) {
                 if(err){
                     console.log('rename error: ' + err);
@@ -60,7 +60,7 @@ router.post('/upload',function(req,res,next){
 });
 router.post('/delete',function(req,res){
     var req_path = req.body.path;
-    var filepath = config.path+'/share/data/' + req.session.user+'/data';
+    var filepath = config.path+'/disk/' + req.session.user+'/data';
     var exec = require('child_process').exec;
 
     //linux下删除
@@ -75,7 +75,7 @@ router.post('/delete',function(req,res){
 });
 
 router.get('/createDir',function(req,res){
-    var path = config.path+'/share/data/' + req.session.user+'/data'+req.session.lastReq;
+    var path = config.path+'/disk/' + req.session.user+'/data'+req.session.lastReq;
     var targetDir = path+'/'+req.query.targetDir;
     fs.exists(targetDir,function(exist){
         if(!exist){

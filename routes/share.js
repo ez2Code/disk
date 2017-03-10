@@ -19,7 +19,7 @@ router.post('/initShare',function(req,res){
         }else if(result=='1'){
             res.json({'success':false,'message':'not exists!'});
         }else{
-            var filepath = config.path+'/share/data/' + result.share_user+'/data'+result.path;
+            var filepath = config.path+'/disk/' + result.share_user+'/data'+result.path;
             fs.stat(filepath, function(err, stats){
                 if(err){
                     res.json({'success':false,'message':'internal error,please try again'});

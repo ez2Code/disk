@@ -22,7 +22,7 @@ router.post('/', function(req, res, next) {
     if(req_path=='/'){
         req_path='';
     }
-    var filepath = config.path+"/share/data/" + req.session.user +'/data'+ req_path;
+    var filepath = config.path+"/disk/" + req.session.user +'/data'+ req_path;
     fs.exists(filepath, function(exists){
         if(exists){
             fs.stat(filepath, function(err, stats){
@@ -44,7 +44,7 @@ router.post('/', function(req, res, next) {
                                     data.files.push({'path':req_path+'/'+item,'name':item,'isFile':false});
                                 }
                             });
-                            if(filepath!=config.path+'/share/data/'+req.session.user+'/data'){
+                            if(filepath!=config.path+'/disk/'+req.session.user+'/data'){
                                 data.isRoot = false;
                             }else{
                                 data.isRoot = true;
