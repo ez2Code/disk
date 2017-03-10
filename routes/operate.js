@@ -37,7 +37,7 @@ router.get('/download/*',function(req,res){
 });
 
 router.post('/upload',function(req,res,next){
-    var form = new multiparty.Form({uploadDir: config.path+'/share/tmp/'});
+    var form = new multiparty.Form({uploadDir: config.path+'/tmp/'});
 
     form.parse(req, function(err, fields, files) {
         var filesTmp = JSON.stringify(files,null,2);
