@@ -102,7 +102,7 @@ router.post('/',function(req,res){
 });
 
 router.get('/downShare/*',function(req,res){
-    var req_path = req.path;
+    var req_path = decodeURI(req.path);
     var filepath = req.session.route + req_path.substr(10);
     fs.exists(filepath, function(exists){
         if(exists){

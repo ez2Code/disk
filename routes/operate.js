@@ -6,7 +6,7 @@ var dao = require('../dao/dao');
 var config = require('../config/config');
 
 router.get('/download/*',function(req,res){
-    var req_path = req.path;
+    var req_path = decodeURI(req.path);
     if(req.session.user){
         var filepath = config.path+'/disk/'+req.session.user+'/data' + req_path.substr(9);
     }else{
